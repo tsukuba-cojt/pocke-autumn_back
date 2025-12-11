@@ -44,7 +44,7 @@ authApp.post('/login', zValidator('json', authSchema), async (c) => {
 
 // 3. Google認証開始
 authApp.get('/google', async (c) => {
-  console.log('🚀 Auth Start Clicked! Time:', new Date().toISOString())
+  // console.log('🚀 Auth Start Clicked! Time:', new Date().toISOString())
 
   const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://localhost:8787/auth/google/callback')
   const state = generateState()
@@ -106,7 +106,7 @@ authApp.get('/google/callback', async (c) => {
     const token = await createToken(user, c.env.JWT_SECRET)
     return c.json({ token, user }) // 本番ではフロントエンドへリダイレクト推奨
   } catch (e) {
-    console.error('!!! 認証エラー発生 !!!')
+    console.error('認証エラー発生!!!')
     console.error(e)
     return c.json({ error: 'Auth failed' }, 500)
   }
