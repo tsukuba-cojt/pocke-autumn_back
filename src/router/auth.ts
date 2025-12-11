@@ -44,20 +44,34 @@ authApp.post('/login', zValidator('json', authSchema), async (c) => {
 
 // 3. Google認証開始
 authApp.get('/google', async (c) => {
-  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://127.0.0.1:8787/auth/google/callback')
+  console.log('🚀 Auth Start Clicked! Time:', new Date().toISOString())
+
+  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://localhost:8787/auth/google/callback')
   const state = generateState()
   const codeVerifier = generateCodeVerifier()
   const scopes = ["profile","email"]
   const url = await google.createAuthorizationURL(state, codeVerifier, scopes);
 
   //stateとcodeVerifierをCookieブラウザに一時保存しておく
-  setCookie(c, 'state', state, { httpOnly: true, secure: true, path: '/' })
-  setCookie(c, 'code_verifier', codeVerifier, { httpOnly: true, secure: true, path: '/' })
+  setCookie(c, 'state', state, { 
+    httpOnly: true, 
+    secure: false, //localhostではfalseにしておく。本番はtrue
+    path: '/',
+    sameSite: 'Lax',
+    maxAge: 60 * 10 // 10分間有効など、時間を設定しておくと安心
+  })
+  setCookie(c, 'code_verifier', codeVerifier, { 
+    httpOnly: true, 
+    secure: false,
+    path: '/', 
+    sameSite: 'Lax',
+    maxAge: 60 * 10
+  })
   
   return c.redirect(url.toString())
 })
 
-// 4. Googleコールバック
+// 4. Googleコールバックがうまくいってないっぽい
 authApp.get('/google/callback', async (c) => {
   const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://localhost:8787/auth/google/callback')
   const url = new URL(c.req.url)
@@ -67,12 +81,20 @@ authApp.get('/google/callback', async (c) => {
   const storedState = getCookie(c, 'state')
   const storedVerifier = getCookie(c, 'code_verifier')
 
+  // console.log('Debug Auth:', { 
+  //     codeExists: !!code, 
+  //     stateMatches: state === storedState, 
+  //     storedVerifier,
+  //     receivedState: state,
+  //     cookieState: storedState
+  // });
+
   if (!code || !storedVerifier || state !== storedState) return c.json({ error: 'Invalid request' }, 400)
 
   try {
     const tokens = await google.validateAuthorizationCode(code, storedVerifier)
     const res = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      headers: { Authorization: `Bearer ${tokens.accessToken()}` }
     })
     const googleUser = await res.json() as any
 
@@ -84,6 +106,8 @@ authApp.get('/google/callback', async (c) => {
     const token = await createToken(user, c.env.JWT_SECRET)
     return c.json({ token, user }) // 本番ではフロントエンドへリダイレクト推奨
   } catch (e) {
+    console.error('!!! 認証エラー発生 !!!')
+    console.error(e)
     return c.json({ error: 'Auth failed' }, 500)
   }
 })
