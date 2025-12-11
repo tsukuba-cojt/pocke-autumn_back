@@ -14,7 +14,5 @@ app.use('*', dbMiddleware)
 
 // ルーターをまとめてバインド
 bindRoutes(app)
-app.route('/auth', authRouter)
-
 
 export default app
