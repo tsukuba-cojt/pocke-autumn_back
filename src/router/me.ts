@@ -1,3 +1,4 @@
+// src/router/auth.ts
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { jwt } from 'hono/jwt'
@@ -14,7 +15,7 @@ meApp.use('/', (c,next)=>{
   return jwtMiddleware(c,next)
 })
 
-//プロフィールの表示 SNSの表示もしなきゃ
+//プロフィールの表示
 meApp.get('/',  async (c) => {
     const payload = c.get('jwtPayload')
     const myId = payload.sub
@@ -48,7 +49,7 @@ const updateProfileSchema = z.object({
   iconUrl: z.string().optional(),
 })
 
-//プロフィールの編集 SNSも入れなきゃ
+//プロフィールの編集
 meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
   const payload = c.get('jwtPayload')
   const myId = payload.sub as string
@@ -76,7 +77,5 @@ meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
     return c.json({ error: 'Failed to update profile' }, 500)
   }
 })
-
-//所属しているコミュニティの表示
 
 export default meApp
