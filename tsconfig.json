@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "lib": [
       "ESNext",
-      "DOM"      // ← これを追加
+      "DOM"
     ],
     "types": ["@cloudflare/workers-types"],
     "jsx": "react-jsx",
