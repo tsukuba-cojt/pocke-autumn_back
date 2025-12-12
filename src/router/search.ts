@@ -2,9 +2,9 @@
 
 import { Hono } from 'hono'
 import { searchSpotifyTracks } from '../features/search/spotify/spotify'
-import 'dotenv/config'
+import type { Bindings } from '../global'   // パスはプロジェクトに合わせて
 
-export const searchRouter = new Hono()
+export const searchRouter = new Hono<{ Bindings: Bindings }>()
 
 // GET /search/spotify?q=...
 searchRouter.get('/spotify', async (c) => {
@@ -14,12 +14,7 @@ searchRouter.get('/spotify', async (c) => {
     return c.json({ message: 'query is required' }, 400)
   }
 
-  const token = c.env.SPOTIFY_ACCESS_TOKEN
-  if (!token) {
-    return c.json({ message: 'Spotify token not configured' }, 500)
-  }
-
-  const tracks = await searchSpotifyTracks(q, token)
+  const tracks = await searchSpotifyTracks(c.env, q)
 
   return c.json({
     type: 'spotify',
