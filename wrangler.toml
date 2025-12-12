@@ -17,4 +17,5 @@ compatibility_date = "2025-12-05"
 binding = "DB"
 database_name = "pocke-db"
 database_id = "dc58c951-d66f-46c7-ac65-d2be3cac718c"
+migrations_dir = "drizzle"
 
