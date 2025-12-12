@@ -1,4 +1,3 @@
-// src/router/auth.ts
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { jwt } from 'hono/jwt'
