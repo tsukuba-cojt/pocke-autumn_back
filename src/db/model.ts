@@ -19,3 +19,17 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 })
+
+export const lists = sqliteTable('lists', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  thumbnailUrl: text('thumbnail_url'),
+  userId: text('user_id').notNull(),
+  createdAt: integer('created_at')
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at')
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+})
