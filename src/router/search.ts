@@ -2,9 +2,9 @@
 
 import { Hono } from 'hono'
 import { searchSpotifyTracks } from '../features/search/spotify/spotify'
-import type { Bindings } from '../global'   // パスはプロジェクトに合わせて
+import type { AppEnv } from '../middleware/db'
 
-export const searchRouter = new Hono<{ Bindings: Bindings }>()
+export const searchRouter = new Hono<AppEnv>()
 
 // GET /search/spotify?q=...
 searchRouter.get('/spotify', async (c) => {
