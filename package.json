@@ -19,7 +19,6 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@cloudflare/workerd-windows-64": "^1.20251212.0",
     "@cloudflare/workers-types": "^4.20251212.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.10.3",
