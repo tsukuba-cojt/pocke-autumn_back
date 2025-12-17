@@ -33,3 +33,20 @@ export const lists = sqliteTable('lists', {
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
 })
+
+export const genre = sqliteTable('genre', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull().unique(),
+})
+
+export const items = sqliteTable('items', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  author: text('author'),
+  url: text('url'),
+  imageUrl: text('image_url'),
+  genreId: text('genre_id').references(() => genre.id),
+  createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`strftime('%s','now')`),
+})
+
