@@ -5,6 +5,7 @@ import { searchRouter } from './search'
 import { listRouter } from './list'
 import { meApp } from './me'
 import { comApp } from './community'
+import { listRouter } from './list'
 
 export const bindRoutes = (app: Hono) => {
     app.route('/test', testRouter)
@@ -13,4 +14,5 @@ export const bindRoutes = (app: Hono) => {
     app.route('/list', listRouter)
     app.route('/me', meApp)
     app.route('/community', comApp)
+    app.route('/list', listRouter)
 }
