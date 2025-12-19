@@ -19,3 +19,34 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 })
+
+export const lists = sqliteTable('lists', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  thumbnailUrl: text('thumbnail_url'),
+  userId: text('user_id').notNull(),
+  createdAt: integer('created_at')
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at')
+    .notNull()
+    .default(sql`(strftime('%s', 'now'))`),
+})
+
+export const genre = sqliteTable('genre', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull().unique(),
+})
+
+export const items = sqliteTable('items', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  author: text('author'),
+  url: text('url'),
+  imageUrl: text('image_url'),
+  genreId: text('genre_id').references(() => genre.id),
+  createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`strftime('%s','now')`),
+})
+
