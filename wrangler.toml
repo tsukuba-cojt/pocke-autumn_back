@@ -1,4 +1,4 @@
-name = "pocke-autumn-backend"
+name = "pocke-autumn-back"
 main = "src/index.ts"
 compatibility_date = "2025-12-05"
 
