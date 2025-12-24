@@ -2,8 +2,14 @@ import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { createList } from '../features/list/createList' // あなたの置き場所に合わせて相対パス調整
 import { showList } from '../features/list/showList' // あなたの置き場所に合わせて相対パス調整
+import { jwt } from 'hono/jwt'
 
-export const listRouter = new Hono<{ Bindings: AppEnv }>()
+export const listRouter = new Hono<AppEnv>()
+
+listRouter.use('/', (c,next)=>{
+  const jwtMiddleware = jwt({secret: c.env.JWT_SECRET,})
+  return jwtMiddleware(c,next)
+})
 
 listRouter.post('/create', async (c) => {
   const body = await c.req.json<{
