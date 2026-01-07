@@ -1,8 +1,16 @@
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
-import { createList } from '../features/list/createList' // あなたの置き場所に合わせて相対パス調整
+import { createList } from '../features/list/createList'
+import { showList } from '../features/list/showList'
+import { showListsByCommunity } from '../features/list/showLists'
+import { jwt } from 'hono/jwt'
 
-export const listRouter = new Hono<{ Bindings: AppEnv }>()
+export const listRouter = new Hono<AppEnv>()
+
+listRouter.use('/', (c,next)=>{
+  const jwtMiddleware = jwt({secret: c.env.JWT_SECRET,})
+  return jwtMiddleware(c,next)
+})
 
 listRouter.post('/create', async (c) => {
   const body = await c.req.json<{
@@ -10,10 +18,11 @@ listRouter.post('/create', async (c) => {
     description?: string
     thumbnailUrl?: string
     userId: string
+    communityId: string
   }>()
 
-  if (!body?.name || !body?.userId) {
-    return c.json({ message: 'name and userId are required' }, 400)
+  if (!body?.name || !body?.userId || !body?.communityId) {
+    return c.json({ message: 'name, userId, and communityId are required' }, 400)
   }
 
   const result = await createList(c.env.DB, {
@@ -21,7 +30,34 @@ listRouter.post('/create', async (c) => {
     description: body.description,
     thumbnailUrl: body.thumbnailUrl,
     userId: body.userId,
+    communityId: body.communityId,
   })
 
   return c.json(result, 201)
+})
+
+listRouter.get('/show', async (c) => {
+  const listId = c.req.query('id')
+  if (!listId) {
+    return c.json({ message: 'id is required' }, 400)
+  }
+
+  const result = await showList(c.env.DB, listId)
+
+  if (!result) {
+    return c.json({ message: 'List not found' }, 404)
+  }
+
+  return c.json(result)
+})
+
+listRouter.get('/by-community', async (c) => {
+  const communityId = c.req.query('communityId')
+  if (!communityId) {
+    return c.json({ message: 'communityId is required' }, 400)
+  }
+
+  const result = await showListsByCommunity(c.env.DB, communityId)
+
+  return c.json(result)
 })

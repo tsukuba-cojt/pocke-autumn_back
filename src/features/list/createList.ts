@@ -1,11 +1,12 @@
 import { drizzle } from 'drizzle-orm/d1'
-import { lists } from '../../db/model'
+import { commLists, lists } from '../../db/model'
 
 type CreateListInput = {
   name: string
   description?: string
   thumbnailUrl?: string
   userId: string
+  communityId: string
 }
 
 export async function createList(
@@ -16,6 +17,7 @@ export async function createList(
 
   const now = Math.floor(Date.now() / 1000)
   const id = crypto.randomUUID()
+  const commListId = crypto.randomUUID()
 
   await orm.insert(lists).values({
     id,
@@ -27,12 +29,20 @@ export async function createList(
     updatedAt: now,
   })
 
+  await orm.insert(commLists).values({
+    id: commListId,
+    commId: input.communityId,
+    listId: id,
+    createdAt: now,
+  })
+
   return {
     id,
     name: input.name,
     description: input.description ?? null,
     thumbnailUrl: input.thumbnailUrl ?? null,
     userId: input.userId,
+    communityId: input.communityId,
     createdAt: now,
     updatedAt: now,
   }
