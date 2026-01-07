@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 
 export const meApp = new Hono<AppEnv>()
-
+//hui
 //認証
 meApp.use('/', (c,next)=>{
   const jwtMiddleware = jwt({secret: c.env.JWT_SECRET,})
@@ -19,22 +19,23 @@ meApp.get('/',  async (c) => {
     const payload = c.get('jwtPayload')
     const myId = payload.sub
     
-    const result = await c.var.db
-      .select()
-      .from(users)
-      .where(eq(users.id,myId)).limit(1)
-    
-      const me = result[0]
+    const me = await c.var.db.query.users.findFirst({
+      where: eq(users.id,myId),
+      with: {
+        snsUrls: true,
+      },
+    })
 
-      if(!me) {
-        return c.json({ error: 'User not found' }, 404)
-      }
+    if(!me) {
+      return c.json({ error: 'User not found' }, 404)
+    }
     
     return c.json({
     user: {
       id: me.id,
       email: me.email,
-      name: me.username,
+      username: me.username,
+      dsplayName: me.displayName,
       description: me.description,
       icon: me.iconUrl
     }
@@ -44,11 +45,12 @@ meApp.get('/',  async (c) => {
 
 const updateProfileSchema = z.object({
   username: z.string().max(50).optional(),
+  displayName: z.string().max(50).optional(),
   description: z.string().max(200).optional(),
   iconUrl: z.string().optional(),
 })
 
-//プロフィールの編集 SNSも入れなきゃ
+//プロフィールの編集
 meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
   const payload = c.get('jwtPayload')
   const myId = payload.sub as string
@@ -66,8 +68,8 @@ meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
     return c.json({
       user: {
         id: me.id,
-        email: me.email,
-        name: me.username,
+        username: me.username,
+        displayName: me.displayName,
         description: me.description,
         icon: me.iconUrl
       }

@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 
 export const comApp = new Hono<AppEnv>()
-
+//hui
 //認証
 comApp.use('/', (c,next)=>{
   const jwtMiddleware = jwt({secret: c.env.JWT_SECRET,})
