@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer ,unique,primaryKey, AnySQLiteColumn} from 'drizzle-orm/sqlite-core'
-import { sql, relations} from 'drizzle-orm';
+import { sqliteTable, text, integer, unique, primaryKey, AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
+import { sql, relations } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -12,7 +12,8 @@ export const users = sqliteTable('users', {
   authProvider: text('auth_provider'),
   authId: text('auth_id').unique(),
   
-  username: text('username').notNull(),
+  username: text('username').notNull(), //ユーザ名
+  displayName: text('display_name').notNull().default(""), //表示名（タイポ修正済み）
   iconUrl: text('icon_url'),
 
   description: text('description'),
@@ -28,8 +29,8 @@ export const lists = sqliteTable('lists', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
-  thumbnailUrl: text('thumbnail_url'),
-  userId: text('user_id').notNull().references(()=>users.id),
+  thumbnail_url: text('thumbnail_url'),
+  userId: text('user_id').notNull().references(() => users.id),
   createdAt: integer('created_at')
     .notNull()
     .default(sql`(strftime('%s', 'now'))`),
@@ -51,15 +52,15 @@ export const items = sqliteTable('items', {
   imageUrl: text('image_url'),
   genreId: text('genre_id').references(() => genre.id),
   createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`strftime('%s','now')`),
+    .default(sql`(strftime('%s','now'))`), // カッコ追加
 })
 
-export const snsUrl = sqliteTable('sns_url',{
+export const snsUrl = sqliteTable('sns_url', {
   id: text('id').primaryKey(),
   url: text('url').notNull(),
-  userId: text('user_id').notNull().references(()=> users.id),
-},(t) => ({
-  unq: unique().on(t.userId,t.url)
+  userId: text('user_id').notNull().references(() => users.id),
+}, (t) => ({
+  unq: unique().on(t.userId, t.url)
 }));
 
 export const communities = sqliteTable('communities', {
@@ -79,64 +80,64 @@ export const communities = sqliteTable('communities', {
 //middle
 // users ⇔ communities
 export const communityMembers = sqliteTable('community_members', {
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id), // users.id への外部キー
-    comId: text('community_id')
-      .notNull()
-      .references(() => communities.id),
-    authority: text('authority'), //'admin'| 'member'
-    joinedAt: integer('joined_at', { mode: 'number' })
-    .default(sql`strftime('%s','now')`),
-  },
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id), // users.id への外部キー
+  comId: text('community_id')
+    .notNull()
+    .references(() => communities.id),
+  authority: text('authority'), //'admin'| 'member'
+  joinedAt: integer('joined_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`), // カッコ追加
+},
   (t) => ({
-		pk: primaryKey({ columns: [t.userId, t.comId] })
-	}),
+    pk: primaryKey({ columns: [t.userId, t.comId] })
+  }),
 );
 
 // communities ⇔ lists
 export const commLists = sqliteTable('community_lists', {
-    id: text('id').primaryKey(),
-    commId: text('community_id')
-      .notNull()
-      .references(() => communities.id), // users.id への外部キー
-    listId: text('lists_id')
-      .notNull()
-      .references(() => lists.id),
-    createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`strftime('%s','now')`),
-  },
+  id: text('id').primaryKey(),
+  commId: text('community_id')
+    .notNull()
+    .references(() => communities.id), // users.id への外部キー
+  listId: text('lists_id')
+    .notNull()
+    .references(() => lists.id),
+  createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`), // カッコ追加
+},
   (t) => ({
-		unq: unique().on(t.commId, t.listId),
-	}),
+    unq: unique().on(t.commId, t.listId),
+  }),
 );
 
 
 // items ⇔ lists
 export const listItems = sqliteTable('list_items', {
-    id: text('id').primaryKey(),
-    itemId: text('item_id')
-      .notNull()
-      .references(() => items.id), // users.id への外部キー
-    listId: text('lists_id')
-      .notNull()
-      .references(() => lists.id),
-    userId: text('user_id')
-      .notNull()
-      .references(()=> users.id),
-    createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`strftime('%s','now')`),
-  },
+  id: text('id').primaryKey(),
+  itemId: text('item_id')
+    .notNull()
+    .references(() => items.id), // users.id への外部キー
+  listId: text('lists_id')
+    .notNull()
+    .references(() => lists.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
+  createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`), // カッコ追加
+},
   (t) => ({
-		unq: unique().on(t.itemId, t.listId),
-	}),
+    unq: unique().on(t.itemId, t.listId),
+  }),
 );
 
 export const threads = sqliteTable('threads', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(()=> users.id),
-  listItemId: text('item_id').notNull().references(()=> listItems.id),
-  replyId: text('reply_id').references(():AnySQLiteColumn => threads.id),
+  userId: text('user_id').notNull().references(() => users.id),
+  listItemId: text('item_id').notNull().references(() => listItems.id),
+  replyId: text('reply_id').references((): AnySQLiteColumn => threads.id),
   text: text('text').notNull(),
   createdAt: integer('created_at')
     .notNull()
@@ -146,35 +147,35 @@ export const threads = sqliteTable('threads', {
 
 // meToo listitems ⇔ users
 export const meToo = sqliteTable('me_too', {
-    listItemId: text('list_item_id')
-      .notNull()
-      .references(() => listItems.id),
-    userId: text('user_id')
-      .notNull()
-      .references(()=> users.id),
-    createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`strftime('%s','now')`),
-  },
+  listItemId: text('list_item_id')
+    .notNull()
+    .references(() => listItems.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
+  createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`), // カッコ追加
+},
   (t) => ({
-		unq: unique().on(t.listItemId, t.userId),
-	}),
+    unq: unique().on(t.listItemId, t.userId),
+  }),
 );
 
 
 // favList listitems ⇔ users
 export const favList = sqliteTable('fav_list', {
-    listItemId: text('list_item_id')
-      .notNull()
-      .references(() => listItems.id),
-    userId: text('user_id')
-      .notNull()
-      .references(()=> users.id),
-    createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`strftime('%s','now')`),
-  },
+  listItemId: text('list_item_id')
+    .notNull()
+    .references(() => listItems.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
+  createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`), // カッコ追加
+},
   (t) => ({
-		unq: unique().on(t.listItemId, t.userId),
-	}),
+    unq: unique().on(t.listItemId, t.userId),
+  }),
 );
 
 
@@ -193,7 +194,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const snsUrlsRelations = relations(snsUrl, ({ one }) => ({
   user: one(users, {
     fields: [snsUrl.userId],
-    references: [users.id], 
+    references: [users.id],
   }),
 }));
 
@@ -211,7 +212,7 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
   listItems: many(listItems),
 }));
 
-export const itemsRelations = relations(items, ({ one,many }) => ({
+export const itemsRelations = relations(items, ({ one, many }) => ({
   listItems: many(listItems),
   genre: one(genre, {
     fields: [items.genreId],
@@ -224,10 +225,10 @@ export const genreRelations = relations(genre, ({ many }) => ({
 }));
 
 //threads
-export const threadsRelations = relations(threads, ({ one,many }) => ({
+export const threadsRelations = relations(threads, ({ one, many }) => ({
   item: one(listItems, {
     fields: [threads.listItemId],
-    references: [listItems.id], 
+    references: [listItems.id],
   }),
 
   author: one(users, {
@@ -248,12 +249,12 @@ export const threadsRelations = relations(threads, ({ one,many }) => ({
 }));
 
 //listItems
-export const listItemsRelations = relations(listItems, ({ one,many }) => ({
+export const listItemsRelations = relations(listItems, ({ one, many }) => ({
   item: one(items, {
     fields: [listItems.itemId],
     references: [items.id],
   }),
-  list: one(lists, { 
+  list: one(lists, {
     fields: [listItems.listId],
     references: [lists.id],
   }),
@@ -272,11 +273,11 @@ export const listItemsRelations = relations(listItems, ({ one,many }) => ({
 //以下中間テーブルのリレーション
 //communityMembers
 export const communityMembersRelations = relations(communityMembers, ({ one }) => ({
-  user: one(users, { 
+  user: one(users, {
     fields: [communityMembers.userId],
     references: [users.id],
   }),
-  community: one(communities, { 
+  community: one(communities, {
     fields: [communityMembers.comId],
     references: [communities.id],
   }),
@@ -317,4 +318,3 @@ export const favListRelations = relations(favList, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
