@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/d1'
 import { eq } from 'drizzle-orm'
 import { commLists, lists } from '../../db/model'
 
-export async function showListsByCommunity(
+export async function showLists(
   db: D1Database,
   communityId: string
 ) {
