@@ -7,6 +7,7 @@ import { Bindings } from '../global'
 export type AppEnv = {
   Bindings: Bindings
   Variables: { db: DrizzleD1Database }
+  DB: D1Database
 }
 
 export const dbMiddleware = createMiddleware<AppEnv>(async (c, next) => {
