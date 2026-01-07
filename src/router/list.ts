@@ -1,8 +1,7 @@
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { createList } from '../features/list/createList'
-import { showList } from '../features/list/showList'
-import { showListsByCommunity } from '../features/list/showLists'
+import { showLists } from '../features/list/showLists'
 import { jwt } from 'hono/jwt'
 
 export const listRouter = new Hono<AppEnv>()
@@ -42,22 +41,11 @@ listRouter.get('/show', async (c) => {
     return c.json({ message: 'id is required' }, 400)
   }
 
-  const result = await showList(c.env.DB, listId)
+  const result = await showLists(c.env.DB, listId)
 
   if (!result) {
     return c.json({ message: 'List not found' }, 404)
   }
-
-  return c.json(result)
-})
-
-listRouter.get('/by-community', async (c) => {
-  const communityId = c.req.query('communityId')
-  if (!communityId) {
-    return c.json({ message: 'communityId is required' }, 400)
-  }
-
-  const result = await showListsByCommunity(c.env.DB, communityId)
 
   return c.json(result)
 })
