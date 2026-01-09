@@ -35,9 +35,10 @@ meApp.get('/',  async (c) => {
       id: me.id,
       email: me.email,
       username: me.username,
-      dsplayName: me.displayName,
+      displayName: me.displayName,
       description: me.description,
-      icon: me.iconUrl
+      icon: me.iconUrl,
+      sns: me.snsUrls
     }
   })
   }
