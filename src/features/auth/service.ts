@@ -8,10 +8,11 @@ export const authService = {
   // A. メアドで新規登録
   async registerEmail(db: DrizzleD1Database, email: string, pass: string) {
     const passwordHash = await hash(pass, 10)
-    const newUser = {//登録するデータの準備　JSのオブジェクトを作成
+
+    const newUser = {
       id: crypto.randomUUID(),
-      email:email,//引数のメアド
-      passwordHash,//上で作ったハッシュ
+      email:email,
+      passwordHash,
       username:email.split('@')[0],
     }
     // 戻り値でユーザ情報を返す。DBへの保存

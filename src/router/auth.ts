@@ -12,18 +12,17 @@ import { authService } from '../features/auth/service'
 
 export const authApp = new Hono<AppEnv>()
 
-// --- JWT発行の共通関数 ---
+//JWT発行の共通関数
 const createToken = async (user: { id: string, email: string }, secret: string) => {
   return await sign({ sub: user.id, email: user.email, exp: Math.floor(Date.now()/1000)+86400 }, secret)
-}//ユーザIDと有効期限、秘密鍵で署名
+}
 
-// 1. メアド登録
+
 const authSchema = z.object({ email: z.email(), password: z.string().min(8) })
-
-//zValidator→門番　ミドルウェア→メインの処理{}の中身が走る前の門番。送られてきたデータが決めて置いたルールauthSchemaを守っているかをチェック
-authApp.post('/signup', zValidator('json', authSchema), async (c) => { //cって何モノ？contextの頭文字の箱　リクエストからレスポンスまでの一階のやり取りに必要な全ての情報と道具
-  const { email, password } = c.req.valid('json') //データの受け取り 片がちゃんと付いた安全なデータを受け取る
-  try {//try→安全装置　try{まずはこれをやってみて}もしエラーが起きたらcatch(e)に飛び、エラーを返す。
+//新規登録
+authApp.post('/signup', zValidator('json', authSchema), async (c) => {
+  const { email, password } = c.req.valid('json')
+  try {
     const user = await authService.registerEmail(c.var.db, email, password)
     const token = await createToken(user, c.env.JWT_SECRET)
     return c.json({ token, user })
