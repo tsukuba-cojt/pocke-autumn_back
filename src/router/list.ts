@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { createList } from '../features/list/createList'
 import { showList } from '../features/list/showList'
+import { listByCommunity } from '../features/list/listByCommunity'
 
 export const listRouter = new Hono<AppEnv>()
 
@@ -27,6 +28,17 @@ listRouter.post('/create', async (c) => {
   })
 
   return c.json(result, 201)
+})
+
+listRouter.get('/community/:communityId', async (c) => {
+  const { communityId } = c.req.param()
+
+  if (!communityId) {
+    return c.json({ message: 'communityId is required' }, 400)
+  }
+
+  const result = await listByCommunity(c.var.db, { communityId })
+  return c.json(result, 200)
 })
 
 listRouter.get('/:listId', async (c) => {
