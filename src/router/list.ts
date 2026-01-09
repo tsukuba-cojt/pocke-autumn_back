@@ -8,7 +8,7 @@ import { updateList } from '../features/list/updateList'
 
 export const listRouter = new Hono<AppEnv>()
 
-listRouter.use('/', (c, next) => {
+listRouter.use('/*', (c, next) => {
   const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
   return jwtMiddleware(c, next)
 })
