@@ -1,39 +1,55 @@
-import { drizzle } from 'drizzle-orm/d1'
-import { lists } from '../../db/model'
+import { DrizzleD1Database } from 'drizzle-orm/d1'
+import { commLists, lists } from '../../db/model'
+import { ListType } from './type'
 
 type CreateListInput = {
   name: string
-  description?: string
-  thumbnailUrl?: string
+  description?: string | null
+  thumbnailUrl?: string | null
   userId: string
+  communityId: string
 }
 
-export async function createList(
-  db: D1Database,
+export const createList = async (
+  db: DrizzleD1Database,
   input: CreateListInput
-) {
-  const orm = drizzle(db)
+): Promise<{ list: ListType }> => {
+  const listId = crypto.randomUUID()
 
-  const now = Math.floor(Date.now() / 1000)
-  const id = crypto.randomUUID()
+  const createdList = await db
+    .insert(lists)
+    .values({
+      id: listId,
+      name: input.name,
+      description: input.description ?? null,
+      thumbnail_url: input.thumbnailUrl ?? null,
+      userId: input.userId,
+    })
+    .returning()
+    .get()
 
-  await orm.insert(lists).values({
-    id,
-    name: input.name,
-    description: input.description ?? null,
-    thumbnailUrl: input.thumbnailUrl ?? null,
-    userId: input.userId,
-    createdAt: now,
-    updatedAt: now,
-  })
+  if (!createdList) {
+    throw new Error('Failed to create list')
+  }
+
+  await db
+    .insert(commLists)
+    .values({
+      id: crypto.randomUUID(),
+      commId: input.communityId,
+      listId: createdList.id,
+    })
+    .run()
 
   return {
-    id,
-    name: input.name,
-    description: input.description ?? null,
-    thumbnailUrl: input.thumbnailUrl ?? null,
-    userId: input.userId,
-    createdAt: now,
-    updatedAt: now,
+    list: {
+      id: createdList.id,
+      name: createdList.name,
+      description: createdList.description,
+      thumbnailUrl: createdList.thumbnail_url,
+      userId: createdList.userId,
+      createdAt: createdList.createdAt,
+      updatedAt: createdList.updatedAt,
+    },
   }
 }
