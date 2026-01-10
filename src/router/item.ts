@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { jwt } from 'hono/jwt'
 import type { AppEnv } from '../middleware/db'
-import { addItem } from '../features/item/addItem'
+// import { addItem } from '../features/item/addItem'
 
 export const itemRouter = new Hono<AppEnv>()
 

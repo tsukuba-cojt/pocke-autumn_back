@@ -13,8 +13,8 @@ CREATE TABLE `communities` (
 	`name` text NOT NULL,
 	`icon_url` text,
 	`description` text,
-	`created_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `community_members` (
@@ -71,8 +71,8 @@ CREATE TABLE `lists` (
 	`description` text,
 	`thumbnail_url` text,
 	`user_id` text NOT NULL,
-	`created_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -112,11 +112,10 @@ CREATE TABLE `users` (
 	`auth_provider` text,
 	`auth_id` text,
 	`username` text NOT NULL,
-	`display_name` text DEFAULT '' NOT NULL,
 	`icon_url` text,
 	`description` text,
-	`created_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL,
-	`updated_at` integer DEFAULT (strftime('%s', 'now')) NOT NULL
+	`created_at` integer DEFAULT (strftime('%s','now')) NOT NULL,
+	`updated_at` integer DEFAULT (strftime('%s','now')) NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint

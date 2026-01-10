@@ -19,10 +19,10 @@ export const users = sqliteTable('users', {
   description: text('description'),
   createdAt: integer('created_at', { mode: 'number' })
     .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s','now'))`),
   updatedAt: integer('updated_at', { mode: 'number' })
     .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s','now'))`),
 })
 
 export const lists = sqliteTable('lists', {
@@ -33,10 +33,10 @@ export const lists = sqliteTable('lists', {
   userId: text('user_id').notNull().references(() => users.id),
   createdAt: integer('created_at')
     .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s','now'))`),
   updatedAt: integer('updated_at')
     .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s','now'))`),
 })
 
 export const genre = sqliteTable('genre', {
@@ -70,26 +70,26 @@ export const communities = sqliteTable('communities', {
   description: text('description'),
   createdAt: integer('created_at')
     .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s','now'))`),
   updatedAt: integer('updated_at')
     .notNull()
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s','now'))`),
 })
 
 
 //middle
 // users ⇔ communities
 export const communityMembers = sqliteTable('community_members', {
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id), // users.id への外部キー
-  comId: text('community_id')
-    .notNull()
-    .references(() => communities.id),
-  authority: text('authority'), //'admin'| 'member'
-  joinedAt: integer('joined_at', { mode: 'number' })
-    .default(sql`(strftime('%s','now'))`), // カッコ追加
-},
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id), // users.id への外部キー
+    comId: text('community_id')
+      .notNull()
+      .references(() => communities.id),
+    authority: text('authority'), //'admin'| 'member'
+    joinedAt: integer('joined_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`),
+  },
   (t) => ({
     pk: primaryKey({ columns: [t.userId, t.comId] })
   }),
@@ -97,16 +97,16 @@ export const communityMembers = sqliteTable('community_members', {
 
 // communities ⇔ lists
 export const commLists = sqliteTable('community_lists', {
-  id: text('id').primaryKey(),
-  commId: text('community_id')
-    .notNull()
-    .references(() => communities.id), // users.id への外部キー
-  listId: text('lists_id')
-    .notNull()
-    .references(() => lists.id),
-  createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`(strftime('%s','now'))`), // カッコ追加
-},
+    id: text('id').primaryKey(),
+    commId: text('community_id')
+      .notNull()
+      .references(() => communities.id), // users.id への外部キー
+    listId: text('lists_id')
+      .notNull()
+      .references(() => lists.id),
+    createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`),
+  },
   (t) => ({
     unq: unique().on(t.commId, t.listId),
   }),
@@ -115,19 +115,19 @@ export const commLists = sqliteTable('community_lists', {
 
 // items ⇔ lists
 export const listItems = sqliteTable('list_items', {
-  id: text('id').primaryKey(),
-  itemId: text('item_id')
-    .notNull()
-    .references(() => items.id), // users.id への外部キー
-  listId: text('lists_id')
-    .notNull()
-    .references(() => lists.id),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id),
-  createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`(strftime('%s','now'))`), // カッコ追加
-},
+    id: text('id').primaryKey(),
+    itemId: text('item_id')
+      .notNull()
+      .references(() => items.id), // users.id への外部キー
+    listId: text('lists_id')
+      .notNull()
+      .references(() => lists.id),
+    userId: text('user_id')
+      .notNull()
+      .references(()=> users.id),
+    createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`),
+  },
   (t) => ({
     unq: unique().on(t.itemId, t.listId),
   }),
@@ -147,15 +147,15 @@ export const threads = sqliteTable('threads', {
 
 // meToo listitems ⇔ users
 export const meToo = sqliteTable('me_too', {
-  listItemId: text('list_item_id')
-    .notNull()
-    .references(() => listItems.id),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id),
-  createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`(strftime('%s','now'))`), // カッコ追加
-},
+    listItemId: text('list_item_id')
+      .notNull()
+      .references(() => listItems.id),
+    userId: text('user_id')
+      .notNull()
+      .references(()=> users.id),
+    createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`),
+  },
   (t) => ({
     unq: unique().on(t.listItemId, t.userId),
   }),
@@ -164,15 +164,15 @@ export const meToo = sqliteTable('me_too', {
 
 // favList listitems ⇔ users
 export const favList = sqliteTable('fav_list', {
-  listItemId: text('list_item_id')
-    .notNull()
-    .references(() => listItems.id),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id),
-  createdAt: integer('created_at', { mode: 'number' })
-    .default(sql`(strftime('%s','now'))`), // カッコ追加
-},
+    listItemId: text('list_item_id')
+      .notNull()
+      .references(() => listItems.id),
+    userId: text('user_id')
+      .notNull()
+      .references(()=> users.id),
+    createdAt: integer('created_at', { mode: 'number' })
+    .default(sql`(strftime('%s','now'))`),
+  },
   (t) => ({
     unq: unique().on(t.listItemId, t.userId),
   }),
