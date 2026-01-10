@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { jwt } from 'hono/jwt'
-import { users } from '../db/model'
+import { users,snsUrl } from '../db/model'
 import { eq, or, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
@@ -18,28 +18,31 @@ meApp.use('/', (c,next)=>{
 //プロフィールの表示
 meApp.get('/',  async (c) => {
     const payload = c.get('jwtPayload')
-    const myId = payload.sub
+    const myId = payload.sub //ユーザID
+    const db = c.var.db
     
-    const me = await c.var.db.query.users.findFirst({
-      where: eq(users.id,myId),
-      with: {
-        snsUrls: true,
-      },
-    })
+    const user = await db.select()
+    .from(users)
+    .where(eq(users.id,myId))
+    .get() //1件だけ取得
 
-    if(!me) {
+    if(!user) {
       return c.json({ error: 'User not found' }, 404)
     }
+
+    const snsLinks = await db.select()
+    .from(snsUrl)
+    .where(eq(snsUrl.userId,myId))
+    .all()
     
     return c.json({
-    user: {
-      id: me.id,
-      email: me.email,
-      username: me.username,
-      displayName: me.displayName,
-      description: me.description,
-      icon: me.iconUrl,
-      sns: me.snsUrls
+      user: {
+        id: user.id,
+        username: user.username,
+        displayName: user.displayName,
+        description: user.description,
+        iconUrl: user.iconUrl,
+        snsUrl: snsLinks.map(link => link.url)
     }
   })
   }
@@ -52,35 +55,41 @@ const updateProfileSchema = z.object({
   iconUrl: z.string().optional(),
 })
 
-//プロフィールの編集
+//プロフィールの登録・編集
 meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
   const payload = c.get('jwtPayload')
-  const myId = payload.sub as string
+  const myId = payload.sub 
   const data = c.req.valid('json')
 
   try{
-    const result = await c.var.db
+    const [updatedUser] = await c.var.db
       .update(users)
-      .set(data)
+      .set({
+        ...data,
+        updatedAt: Math.floor(Date.now() / 1000),
+      })
       .where(eq(users.id,myId))
       .returning()
-    
-    const me = result[0]
-    
+
     return c.json({
       user: {
-        id: me.id,
-        username: me.username,
-        displayName: me.displayName,
-        description: me.description,
-        icon: me.iconUrl
+        id: updatedUser.id,
+        username: updatedUser.username,
+        displayName: updatedUser.displayName,
+        description: updatedUser.description,
+        iconUrl: updatedUser.iconUrl,
       }
-  })
+    })
   }catch(e){
     return c.json({ error: 'Failed to update profile' }, 500)
   }
 })
 
-//所属しているコミュニティの表示
+
+// const snsSchema = 
+// //snsの追加/削除
+// meApp.patch('/',zValidator('json',snsSchema), async (c) => {
+
+// })
 
 export default meApp

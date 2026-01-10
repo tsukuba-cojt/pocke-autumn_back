@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8ccf35df-8ccb-4871-8446-a0dafccc2f7b",
-  "prevId": "7e42a9e7-202d-497b-988e-d46fcc1b37ef",
+  "id": "7089d63f-3450-4dfa-99dd-b261b25a8e0a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "community_lists": {
       "name": "community_lists",
@@ -34,7 +34,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "strftime('%s','now')"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {
@@ -116,7 +116,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -124,7 +124,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {},
@@ -163,7 +163,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "strftime('%s','now')"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {},
@@ -230,7 +230,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "strftime('%s','now')"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {
@@ -358,7 +358,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "strftime('%s','now')"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {},
@@ -418,7 +418,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "strftime('%s','now')"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {
@@ -520,7 +520,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -528,7 +528,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {},
@@ -574,7 +574,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "strftime('%s','now')"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {
@@ -811,6 +811,14 @@
           "notNull": true,
           "autoincrement": false
         },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
         "icon_url": {
           "name": "icon_url",
           "type": "text",
@@ -831,7 +839,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -839,7 +847,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {
