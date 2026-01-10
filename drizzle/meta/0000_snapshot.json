@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "736a2f66-b4a0-4f35-a987-09af4e36303c",
+  "id": "a94cab29-7963-4881-aa3e-df90c4f14103",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "community_lists": {
@@ -116,7 +116,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -124,7 +124,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {},
@@ -520,7 +520,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -528,7 +528,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {},
@@ -811,14 +811,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "display_name": {
-          "name": "display_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "''"
-        },
         "icon_url": {
           "name": "icon_url",
           "type": "text",
@@ -839,7 +831,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         },
         "updated_at": {
           "name": "updated_at",
@@ -847,7 +839,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(strftime('%s', 'now'))"
+          "default": "(strftime('%s','now'))"
         }
       },
       "indexes": {

@@ -3,7 +3,6 @@ import { logger } from 'hono/logger'
 import { bindRoutes } from './router'
 import { errorHandler } from './middleware/error'
 import { dbMiddleware, AppEnv } from './middleware/db'
-import authRouter from './router/auth'
 
 const app = new Hono()
 app.get('/favicon.ico', (c) => c.text('No icon', 404))
@@ -11,8 +10,8 @@ app.get('/favicon.ico', (c) => c.text('No icon', 404))
 app.use('*', logger())
 app.use('*', errorHandler)
 app.use('*', dbMiddleware)
-
 // ルーターをまとめてバインド
 bindRoutes(app)
+
 
 export default app

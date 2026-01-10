@@ -16,7 +16,6 @@ const createToken = async (user: { id: string, email: string }, secret: string) 
   return await sign({ sub: user.id, email: user.email, exp: Math.floor(Date.now()/1000)+86400 }, secret)
 }
 
-
 const authSchema = z.object({ email: z.email(), password: z.string().min(8) })
 //新規登録
 authApp.post('/signup', zValidator('json', authSchema), async (c) => {
@@ -30,12 +29,21 @@ authApp.post('/signup', zValidator('json', authSchema), async (c) => {
   }
 })
 
-// 2. メアドログイン
+
+
+// メアドログイン
 authApp.post('/login', zValidator('json', authSchema), async (c) => {
   const { email, password } = c.req.valid('json')
   const user = await authService.verifyEmailUser(c.var.db, email, password)
-  if (!user) return c.json({ error: 'Invalid credentials' }, 401)
-  
+
+  if (!user) {
+    console.log(`[Login Failed] ${email}: User not found or Password mismatch`)
+    
+    return c.json({ 
+      error: 'メールアドレスまたはパスワードが違います' 
+    }, 401)
+  }
+
   const token = await createToken(user, c.env.JWT_SECRET)
   return c.json({ token, user })
 })
@@ -44,7 +52,7 @@ authApp.post('/login', zValidator('json', authSchema), async (c) => {
 authApp.get('/google', async (c) => {
   // console.log('🚀 Auth Start Clicked! Time:', new Date().toISOString())
 
-  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://localhost:8787/auth/google/callback')
+  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://127.0.0.1:8787/auth/google/callback')
   const state = generateState()
   const codeVerifier = generateCodeVerifier()
   const scopes = ["profile","email"]
@@ -52,16 +60,17 @@ authApp.get('/google', async (c) => {
 
   //stateとcodeVerifierをCookieブラウザに一時保存しておく
   setCookie(c, 'state', state, { 
-    httpOnly: true, 
     secure: false, //localhostではfalseにしておく。本番はtrue
     path: '/',
-    sameSite: 'Lax',
-    maxAge: 60 * 10 // 10分間有効など、時間を設定しておくと安心
-  })
-  setCookie(c, 'code_verifier', codeVerifier, { 
     httpOnly: true, 
+    sameSite: 'Lax',
+    maxAge: 60 * 10
+  })
+
+  setCookie(c, 'code_verifier', codeVerifier, {   
     secure: false,
     path: '/', 
+    httpOnly: true, 
     sameSite: 'Lax',
     maxAge: 60 * 10
   })
@@ -69,9 +78,9 @@ authApp.get('/google', async (c) => {
   return c.redirect(url.toString())
 })
 
-// 4. Googleコールバックがうまくいってないっぽい
+// 4. Googleコールバック
 authApp.get('/google/callback', async (c) => {
-  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://localhost:8787/auth/google/callback')
+  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://127.0.0.1:8787/auth/google/callback')
   const url = new URL(c.req.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
@@ -102,9 +111,9 @@ authApp.get('/google/callback', async (c) => {
     })
 
     const token = await createToken(user, c.env.JWT_SECRET)
-    return c.json({ token, user }) // 本番ではフロントエンドへリダイレクト推奨
+    return c.redirect("http://127.0.0.1:8787/") // 本番ではフロントエンドへリダイレクト推奨
   } catch (e) {
-    console.error('認証エラー発生!!!')
+    console.error('認証エラー発生')
     console.error(e)
     return c.json({ error: 'Auth failed' }, 500)
   }

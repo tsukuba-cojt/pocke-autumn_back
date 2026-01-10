@@ -5,6 +5,7 @@ import { users } from '../db/model'
 import { eq, or, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
+import { verify } from 'hono/jwt'
 
 export const meApp = new Hono<AppEnv>()
 
@@ -14,7 +15,7 @@ meApp.use('/', (c,next)=>{
   return jwtMiddleware(c,next)
 })
 
-//プロフィールの表示 SNSの表示もしなきゃ
+//プロフィールの表示
 meApp.get('/',  async (c) => {
     const payload = c.get('jwtPayload')
     const myId = payload.sub
@@ -34,7 +35,7 @@ meApp.get('/',  async (c) => {
     user: {
       id: me.id,
       email: me.email,
-      name: me.username,
+      username: me.username,
       description: me.description,
       icon: me.iconUrl
     }
@@ -67,7 +68,7 @@ meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
       user: {
         id: me.id,
         email: me.email,
-        name: me.username,
+        username: me.username,
         description: me.description,
         icon: me.iconUrl
       }

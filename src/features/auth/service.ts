@@ -15,7 +15,7 @@ export const authService = {
       passwordHash,
       username:email.split('@')[0],
     }
-    // 戻り値でユーザ情報を返す。DBへの保存
+    
     return await db.insert(users).values(newUser).returning().get()
   },
 
