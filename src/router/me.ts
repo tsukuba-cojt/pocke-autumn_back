@@ -4,12 +4,13 @@ import { jwt } from 'hono/jwt'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { getUserProfile, updateUserProfile } from '../features/user/profile'
+import { addSnsLink, deleteSnsLink} from '../features/user/snsurl'
 
 
 export const meApp = new Hono<AppEnv>()
 
 //認証
-meApp.use('/', (c,next)=>{
+meApp.use('/*', (c,next)=>{
   const jwtMiddleware = jwt({secret: c.env.JWT_SECRET,})
   return jwtMiddleware(c,next)
 })
@@ -53,11 +54,45 @@ meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
   }
 })
 
+const snsSchema = z.object({
+  url: z.url(),
+})
 
-// const snsSchema = 
-// //snsの追加/削除
-// meApp.patch('/',zValidator('json',snsSchema), async (c) => {
+//snsの追加
+meApp.post('/sns',zValidator('json',snsSchema), async (c) => {
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub
+  const {url} = c.req.valid('json')
 
-// })
+  try {
+    const result = await addSnsLink(c.env.DB, userId, url)
+    return c.json(result, 201)
+  }catch(e){
+    console.error(e)
+    return c.json({ error: 'Failed to add SNS' }, 500)
+  }
+})
 
+const paramSchema = z.object({
+  id: z.string().uuid()// 消したいSNSリンクのID
+})
+
+// URLの後ろにIDをつけて指定する (/sns/123-abc)
+meApp.delete('/sns/:id', zValidator('param', paramSchema), async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id } = c.req.valid('param')
+
+  try {
+    const result = await deleteSnsLink(c.env.DB, payload.sub as string, id)
+    
+    if (!result) {
+      return c.json({ error: 'Link not found or not authorized' }, 404)
+    }
+
+    return c.json({ message: 'Deleted', deleted: result })
+  } catch (e) {
+    console.error(e)
+    return c.json({ error: 'Failed to delete SNS' }, 500)
+  }
+})
 export default meApp

@@ -33,7 +33,10 @@ export async function getUserProfile(db: D1Database, userId: string) {
     displayName: user.displayName,
     description: user.description,
     iconUrl: user.iconUrl,
-    snsUrl: snsLinks.map(link => link.url)
+    snsUrl: snsLinks.map(link => ({
+      id:link.id,
+      url: link.url
+    }))
   }
 }
 
