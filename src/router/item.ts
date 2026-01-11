@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { createItem } from '../features/item/createItem'
+import { showItem } from '../features/item/showItem'
 
 export const itemRouter = new Hono<AppEnv>()
 
@@ -36,4 +37,15 @@ itemRouter.post('/create', async (c) => {
   })
 
   return c.json(result, 201)
+})
+
+itemRouter.get('/list/:listId', async (c) => {
+  const { listId } = c.req.param()
+
+  if (!listId) {
+    return c.json({ message: 'listId is required' }, 400)
+  }
+
+  const result = await showItem(c.var.db, { listId })
+  return c.json(result, 200)
 })
