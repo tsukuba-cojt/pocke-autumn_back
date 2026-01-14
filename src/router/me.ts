@@ -1,82 +1,98 @@
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { jwt } from 'hono/jwt'
-import { users } from '../db/model'
-import { eq, or, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
+import { getUserProfile, updateUserProfile } from '../features/user/profile'
+import { addSnsLink, deleteSnsLink} from '../features/user/snsurl'
+
 
 export const meApp = new Hono<AppEnv>()
 
 //認証
-meApp.use('/', (c,next)=>{
+meApp.use('/*', (c,next)=>{
   const jwtMiddleware = jwt({secret: c.env.JWT_SECRET,})
   return jwtMiddleware(c,next)
 })
 
-//プロフィールの表示 SNSの表示もしなきゃ
+//プロフィールの表示
 meApp.get('/',  async (c) => {
     const payload = c.get('jwtPayload')
-    const myId = payload.sub
+    const userId = payload.sub as string
     
-    const result = await c.var.db
-      .select()
-      .from(users)
-      .where(eq(users.id,myId)).limit(1)
-    
-      const me = result[0]
+    const result = await getUserProfile(c.env.DB, userId)
 
-      if(!me) {
-        return c.json({ error: 'User not found' }, 404)
-      }
-    
-    return c.json({
-    user: {
-      id: me.id,
-      email: me.email,
-      name: me.username,
-      description: me.description,
-      icon: me.iconUrl
+    if(!result) {
+      return c.json({ error: 'User not found'}, 404)
     }
-  })
+
+    return c.json({ user: result })
   }
 )
 
+//バリデーション用スキーマ
 const updateProfileSchema = z.object({
   username: z.string().max(50).optional(),
+  displayName: z.string().max(50).optional(),
   description: z.string().max(200).optional(),
   iconUrl: z.string().optional(),
 })
 
-//プロフィールの編集 SNSも入れなきゃ
+//プロフィールの登録・編集
 meApp.patch('/',zValidator('json', updateProfileSchema), async (c)=> {
   const payload = c.get('jwtPayload')
-  const myId = payload.sub as string
+  const userId = payload.sub 
   const data = c.req.valid('json')
 
   try{
-    const result = await c.var.db
-      .update(users)
-      .set(data)
-      .where(eq(users.id,myId))
-      .returning()
-    
-    const me = result[0]
-    
-    return c.json({
-      user: {
-        id: me.id,
-        email: me.email,
-        name: me.username,
-        description: me.description,
-        icon: me.iconUrl
-      }
-  })
+    const result = await updateUserProfile(c.env.DB, userId, data)
+    return c.json({ user: result })
+
   }catch(e){
+    console.error(e)
     return c.json({ error: 'Failed to update profile' }, 500)
   }
 })
 
-//所属しているコミュニティの表示
+const snsSchema = z.object({
+  url: z.url(),
+})
 
+//snsの追加
+meApp.post('/sns',zValidator('json',snsSchema), async (c) => {
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub
+  const {url} = c.req.valid('json')
+
+  try {
+    const result = await addSnsLink(c.env.DB, userId, url)
+    return c.json(result, 201)
+  }catch(e){
+    console.error(e)
+    return c.json({ error: 'Failed to add SNS' }, 500)
+  }
+})
+
+const paramSchema = z.object({
+  id: z.string().uuid()// 消したいSNSリンクのID
+})
+
+// URLの後ろにIDをつけて指定する (/sns/123-abc)
+meApp.delete('/sns/:id', zValidator('param', paramSchema), async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id } = c.req.valid('param')
+
+  try {
+    const result = await deleteSnsLink(c.env.DB, payload.sub as string, id)
+    
+    if (!result) {
+      return c.json({ error: 'Link not found or not authorized' }, 404)
+    }
+
+    return c.json({ message: 'Deleted', deleted: result })
+  } catch (e) {
+    console.error(e)
+    return c.json({ error: 'Failed to delete SNS' }, 500)
+  }
+})
 export default meApp
