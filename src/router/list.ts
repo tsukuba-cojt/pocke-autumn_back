@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { jwt } from 'hono/jwt'
 import { AppEnv } from '../middleware/db'
 import { createList } from '../features/list/createList'
 import { showList } from '../features/list/showList'
@@ -7,11 +8,10 @@ import { updateList } from '../features/list/updateList'
 
 export const listRouter = new Hono<AppEnv>()
 
-// TODO: 認証が直るまで一時的に無効化
-// listRouter.use('/*', (c, next) => {
-//   const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
-//   return jwtMiddleware(c, next)
-// })
+listRouter.use('/*', (c, next) => {
+  const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
+  return jwtMiddleware(c, next)
+})
 
 listRouter.post('/create', async (c) => {
   const body = await c.req.json<{
@@ -63,6 +63,8 @@ listRouter.get('/:listId', async (c) => {
 
   return c.json(result, 200)
 })
+
+
 
 listRouter.patch('/:listId', async (c) => {
   const { listId } = c.req.param()
