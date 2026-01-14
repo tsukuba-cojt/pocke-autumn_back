@@ -1,34 +1,35 @@
 import { Hono } from 'hono'
-import { jwt } from 'hono/jwt'
-import type { AppEnv } from '../middleware/db'
-// import { addItem } from '../features/item/addItem'
+import { AppEnv } from '../middleware/db'
+import { createItem } from '../features/item/createItem'
+import { showItem } from '../features/item/showItem'
 
 export const itemRouter = new Hono<AppEnv>()
 
-itemRouter.use('/', (c, next) => {
-  const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
-  return jwtMiddleware(c, next)
-})
+// TODO: 認証が直るまで一時的に無効化
+// itemRouter.use('/*', (c, next) => {
+//   const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
+//   return jwtMiddleware(c, next)
+// })
 
-itemRouter.post('/add', async (c) => {
+itemRouter.post('/create', async (c) => {
   const body = await c.req.json<{
+    title: string
     listId: string
     userId: string
-    title: string
-    author?: string
-    url?: string
-    imageUrl?: string
-    genreId?: string
+    author?: string | null
+    url?: string | null
+    imageUrl?: string | null
+    genreId?: string | null
   }>()
 
-  if (!body?.listId || !body?.userId || !body?.title) {
-    return c.json({ message: 'listId, userId, title are required' }, 400)
+  if (!body?.title || !body?.listId || !body?.userId) {
+    return c.json({ message: 'title, listId, and userId are required' }, 400)
   }
 
-  const result = await addItem(c.env.DB, {
+  const result = await createItem(c.var.db, {
+    title: body.title,
     listId: body.listId,
     userId: body.userId,
-    title: body.title,
     author: body.author,
     url: body.url,
     imageUrl: body.imageUrl,
@@ -36,4 +37,15 @@ itemRouter.post('/add', async (c) => {
   })
 
   return c.json(result, 201)
+})
+
+itemRouter.get('/list/:listId', async (c) => {
+  const { listId } = c.req.param()
+
+  if (!listId) {
+    return c.json({ message: 'listId is required' }, 400)
+  }
+
+  const result = await showItem(c.var.db, { listId })
+  return c.json(result, 200)
 })
