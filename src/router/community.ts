@@ -6,6 +6,7 @@ import { showCommunity } from '../features/community/showCommunity'
 import { updateCommunity } from '../features/community/updateCommunity'
 import { listMembers } from '../features/community/listMembers'
 import { addMember } from '../features/community/addMember'
+import { removeMember } from '../features/community/removeMember'
 
 export const comApp = new Hono<AppEnv>()
 //認証
@@ -72,6 +73,22 @@ comApp.post('/:communityId/members', async (c) => {
   }
 
   return c.json(result, 201)
+})
+
+comApp.delete('/:communityId/members/:userId', async (c) => {
+  const { communityId, userId } = c.req.param()
+
+  if (!communityId || !userId) {
+    return c.json({ message: 'communityId and userId are required' }, 400)
+  }
+
+  const result = await removeMember(c.var.db, { communityId, userId })
+
+  if (!result.removed) {
+    return c.json({ message: 'member not found' }, 404)
+  }
+
+  return c.json(result, 200)
 })
 
 comApp.get('/:communityId', async (c) => {
