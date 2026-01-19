@@ -4,6 +4,7 @@ import { jwt } from 'hono/jwt'
 import { createCommunity } from '../features/community/createCommunity'
 import { showCommunity } from '../features/community/showCommunity'
 import { updateCommunity } from '../features/community/updateCommunity'
+import { listMembers } from '../features/community/listMembers'
 
 export const comApp = new Hono<AppEnv>()
 //認証
@@ -30,6 +31,17 @@ comApp.post('/create', async (c) => {
   })
 
   return c.json(result, 201)
+})
+
+comApp.get('/:communityId/members', async (c) => {
+  const { communityId } = c.req.param()
+
+  if (!communityId) {
+    return c.json({ message: 'communityId is required' }, 400)
+  }
+
+  const result = await listMembers(c.var.db, { communityId })
+  return c.json(result, 200)
 })
 
 comApp.get('/:communityId', async (c) => {
