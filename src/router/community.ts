@@ -5,6 +5,7 @@ import { createCommunity } from '../features/community/createCommunity'
 import { showCommunity } from '../features/community/showCommunity'
 import { updateCommunity } from '../features/community/updateCommunity'
 import { listMembers } from '../features/community/listMembers'
+import { addMember } from '../features/community/addMember'
 
 export const comApp = new Hono<AppEnv>()
 //認証
@@ -42,6 +43,35 @@ comApp.get('/:communityId/members', async (c) => {
 
   const result = await listMembers(c.var.db, { communityId })
   return c.json(result, 200)
+})
+
+comApp.post('/:communityId/members', async (c) => {
+  const { communityId } = c.req.param()
+
+  if (!communityId) {
+    return c.json({ message: 'communityId is required' }, 400)
+  }
+
+  const body = await c.req.json<{
+    userId: string
+    authority?: string | null
+  }>()
+
+  if (!body?.userId) {
+    return c.json({ message: 'userId is required' }, 400)
+  }
+
+  const result = await addMember(c.var.db, {
+    communityId,
+    userId: body.userId,
+    authority: body.authority,
+  })
+
+  if (!result) {
+    return c.json({ message: 'member already exists' }, 409)
+  }
+
+  return c.json(result, 201)
 })
 
 comApp.get('/:communityId', async (c) => {
