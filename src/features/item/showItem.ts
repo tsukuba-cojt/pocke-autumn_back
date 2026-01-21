@@ -1,6 +1,6 @@
 import { DrizzleD1Database } from 'drizzle-orm/d1'
-import { eq } from 'drizzle-orm'
-import { items, listItems } from '../../db/model'
+import { eq, inArray } from 'drizzle-orm'
+import { items, listItems, meToo, users } from '../../db/model'
 
 type ItemRow = {
   id: string
@@ -28,6 +28,12 @@ type ShowItemResult = {
   items: Array<{
     item: ItemRow
     listItem: ListItemRow
+    meTooUsers: Array<{
+      id: string
+      username: string
+      displayName: string
+      iconUrl: string | null
+    }>
   }>
 }
 
@@ -40,6 +46,32 @@ export const showItem = async (
     .from(listItems)
     .innerJoin(items, eq(items.id, listItems.itemId))
     .where(eq(listItems.listId, input.listId))
+
+  const listItemIds = rows.map((row) => row.list_items.id)
+  const meTooByListItem = new Map<
+    string,
+    Array<{ id: string; username: string; displayName: string; iconUrl: string | null }>
+  >()
+
+  if (listItemIds.length > 0) {
+    const meTooRows = await db
+      .select()
+      .from(meToo)
+      .innerJoin(users, eq(users.id, meToo.userId))
+      .where(inArray(meToo.listItemId, listItemIds))
+
+    for (const row of meTooRows) {
+      const listItemId = row.me_too.listItemId
+      const list = meTooByListItem.get(listItemId) ?? []
+      list.push({
+        id: row.users.id,
+        username: row.users.username,
+        displayName: row.users.displayName,
+        iconUrl: row.users.iconUrl,
+      })
+      meTooByListItem.set(listItemId, list)
+    }
+  }
 
   return {
     items: rows.map((row) => ({
@@ -59,6 +91,7 @@ export const showItem = async (
         userId: row.list_items.userId,
         createdAt: row.list_items.createdAt ?? null,
       },
+      meTooUsers: meTooByListItem.get(row.list_items.id) ?? [],
     })),
   }
 }
