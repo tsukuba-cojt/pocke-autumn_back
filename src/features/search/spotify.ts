@@ -1,7 +1,7 @@
 // src/features/search/spotify/spotify.ts （or spotify.feature.ts）
 
-import type { UnifiedSearchItem } from '../types'
-import type { Bindings } from '../../../global.d.ts'
+import type { UnifiedSearchItem } from './types'
+import type { Bindings } from '../../global'
 
 const SPOTIFY_BASE_URL = 'https://api.spotify.com/v1'
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
