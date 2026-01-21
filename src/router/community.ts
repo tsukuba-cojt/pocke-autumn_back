@@ -1,12 +1,16 @@
 import { Hono } from 'hono'
 import { AppEnv } from '../middleware/db'
 import { jwt } from 'hono/jwt'
+import { and, eq } from 'drizzle-orm'
+import { commLists } from '../db/model'
 import { createCommunity } from '../features/community/createCommunity'
 import { showCommunity } from '../features/community/showCommunity'
 import { updateCommunity } from '../features/community/updateCommunity'
 import { listMembers } from '../features/community/listMembers'
 import { addMember } from '../features/community/addMember'
 import { removeMember } from '../features/community/removeMember'
+import { createList } from '../features/list/createList'
+import { deleteList } from '../features/list/deleteList'
 
 export const comApp = new Hono<AppEnv>()
 //認証
@@ -46,6 +50,63 @@ comApp.get('/:communityId/members', async (c) => {
   return c.json(result, 200)
 })
 
+comApp.post('/:communityId/lists', async (c) => {
+  const { communityId } = c.req.param()
+
+  if (!communityId) {
+    return c.json({ message: 'communityId is required' }, 400)
+  }
+
+  const body = await c.req.json<{
+    name: string
+    description?: string | null
+    thumbnailUrl?: string | null
+  }>()
+
+  if (!body?.name) {
+    return c.json({ message: 'name is required' }, 400)
+  }
+
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub as string
+
+  const result = await createList(c.var.db, {
+    name: body.name,
+    description: body.description,
+    thumbnailUrl: body.thumbnailUrl,
+    userId,
+    communityId,
+  })
+
+  return c.json(result, 201)
+})
+
+comApp.delete('/:communityId/lists/:listId', async (c) => {
+  const { communityId, listId } = c.req.param()
+
+  if (!communityId || !listId) {
+    return c.json({ message: 'communityId and listId are required' }, 400)
+  }
+
+  const belongs = await c.var.db
+    .select()
+    .from(commLists)
+    .where(and(eq(commLists.commId, communityId), eq(commLists.listId, listId)))
+    .get()
+
+  if (!belongs) {
+    return c.json({ message: 'list not found in community' }, 404)
+  }
+
+  const result = await deleteList(c.var.db, { listId })
+
+  if (!result.deleted) {
+    return c.json({ message: 'list not found' }, 404)
+  }
+
+  return c.json(result, 200)
+})
+
 comApp.post('/:communityId/members', async (c) => {
   const { communityId } = c.req.param()
 
@@ -54,17 +115,14 @@ comApp.post('/:communityId/members', async (c) => {
   }
 
   const body = await c.req.json<{
-    userId: string
     authority?: string | null
   }>()
-
-  if (!body?.userId) {
-    return c.json({ message: 'userId is required' }, 400)
-  }
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub as string
 
   const result = await addMember(c.var.db, {
     communityId,
-    userId: body.userId,
+    userId,
     authority: body.authority,
   })
 
@@ -80,6 +138,11 @@ comApp.delete('/:communityId/members/:userId', async (c) => {
 
   if (!communityId || !userId) {
     return c.json({ message: 'communityId and userId are required' }, 400)
+  }
+  const payload = c.get('jwtPayload')
+  const myId = payload.sub as string
+  if (userId !== myId) {
+    return c.json({ message: 'forbidden' }, 403)
   }
 
   const result = await removeMember(c.var.db, { communityId, userId })

@@ -52,7 +52,11 @@ authApp.post('/login', zValidator('json', authSchema), async (c) => {
 authApp.get('/google', async (c) => {
   // console.log('🚀 Auth Start Clicked! Time:', new Date().toISOString())
 
-  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://127.0.0.1:8787/auth/google/callback')
+  const google = new Google(
+    c.env.GOOGLE_CLIENT_ID,
+    c.env.GOOGLE_CLIENT_SECRET,
+    'https://pocke-autumn-back.pocke-cojt.workers.dev/auth/google/callback'
+  )
   const state = generateState()
   const codeVerifier = generateCodeVerifier()
   const scopes = ["profile","email"]
@@ -80,7 +84,11 @@ authApp.get('/google', async (c) => {
 
 // 4. Googleコールバック
 authApp.get('/google/callback', async (c) => {
-  const google = new Google(c.env.GOOGLE_CLIENT_ID, c.env.GOOGLE_CLIENT_SECRET, 'http://127.0.0.1:8787/auth/google/callback')
+  const google = new Google(
+    c.env.GOOGLE_CLIENT_ID,
+    c.env.GOOGLE_CLIENT_SECRET,
+    'https://pocke-autumn-back.pocke-cojt.workers.dev/auth/google/callback'
+  )
   const url = new URL(c.req.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
@@ -111,7 +119,7 @@ authApp.get('/google/callback', async (c) => {
     })
 
     const token = await createToken(user, c.env.JWT_SECRET)
-    return c.redirect("http://127.0.0.1:8787/") // 本番ではフロントエンドへリダイレクト推奨
+    return c.redirect("https://pocke-autumn-back.pocke-cojt.workers.dev/") // 本番ではフロントエンドへリダイレクト推奨
   } catch (e) {
     console.error('認証エラー発生')
     console.error(e)

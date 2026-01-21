@@ -1,9 +1,15 @@
 import { Hono } from 'hono'
+import { jwt } from 'hono/jwt'
 import { AppEnv } from '../middleware/db'
 import { createComment } from '../features/comments/createComment'
 import { listComments } from '../features/comments/listComments'
 
 export const commentsRouter = new Hono<AppEnv>()
+
+commentsRouter.use('/*', (c, next) => {
+  const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
+  return jwtMiddleware(c, next)
+})
 
 commentsRouter.post('/:listId/items/:itemId/comments', async (c) => {
   const { listId, itemId } = c.req.param()

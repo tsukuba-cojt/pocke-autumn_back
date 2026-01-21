@@ -6,6 +6,7 @@ import { showItem } from '../features/item/showItem'
 import { addMeToo } from '../features/item/meToo'
 import { removeMeToo } from '../features/item/removeMeToo'
 import { listMeTooUsers } from '../features/item/listMeTooUsers'
+import { deleteItem } from '../features/item/deleteItem'
 
 export const itemRouter = new Hono<AppEnv>()
 
@@ -103,5 +104,21 @@ itemRouter.get('/:listItemId/me-too', async (c) => {
   }
 
   const result = await listMeTooUsers(c.var.db, { listItemId })
+  return c.json(result, 200)
+})
+
+itemRouter.delete('/:listItemId', async (c) => {
+  const { listItemId } = c.req.param()
+
+  if (!listItemId) {
+    return c.json({ message: 'listItemId is required' }, 400)
+  }
+
+  const result = await deleteItem(c.var.db, { listItemId })
+
+  if (!result.deleted) {
+    return c.json({ message: 'item not found' }, 404)
+  }
+
   return c.json(result, 200)
 })
