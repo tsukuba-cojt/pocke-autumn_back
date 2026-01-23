@@ -15,7 +15,7 @@ import { listUserCommunities } from '../features/community/listUserCommunities'
 
 export const comApp = new Hono<AppEnv>()
 //認証
-comApp.use('/', (c, next) => {
+comApp.use('/*', (c, next) => {
   const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
   return jwtMiddleware(c, next)
 })
