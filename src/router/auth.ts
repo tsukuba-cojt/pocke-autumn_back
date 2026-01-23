@@ -16,7 +16,7 @@ const createToken = async (user: { id: string, email: string }, secret: string) 
   return await sign({ sub: user.id, email: user.email, exp: Math.floor(Date.now()/1000)+86400 }, secret)
 }
 
-const authSchema = z.object({ email: z.email(), password: z.string().min(8) })
+const authSchema = z.object({ email: z.string().email(), password: z.string().min(8) })
 //新規登録
 authApp.post('/signup', zValidator('json', authSchema), async (c) => {
   const { email, password } = c.req.valid('json')
