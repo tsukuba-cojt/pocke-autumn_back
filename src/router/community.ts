@@ -11,6 +11,7 @@ import { addMember } from '../features/community/addMember'
 import { removeMember } from '../features/community/removeMember'
 import { createList } from '../features/list/createList'
 import { deleteList } from '../features/list/deleteList'
+import { listUserCommunities } from '../features/community/listUserCommunities'
 
 export const comApp = new Hono<AppEnv>()
 //認証
@@ -37,6 +38,17 @@ comApp.post('/create', async (c) => {
   })
 
   return c.json(result, 201)
+})
+
+comApp.get('/user/:userId', async (c) => {
+  const { userId } = c.req.param()
+
+  if (!userId) {
+    return c.json({ message: 'userId is required' }, 400)
+  }
+
+  const result = await listUserCommunities(c.var.db, { userId })
+  return c.json(result, 200)
 })
 
 comApp.get('/:communityId/members', async (c) => {
