@@ -7,6 +7,7 @@ import { itemRouter } from './item'
 import { commentsRouter } from './comments'
 import { meApp } from './me'
 import { comApp } from './community'
+import { userRouter } from './user'
 
 export const bindRoutes = (app: Hono) => {
     app.route('/test', testRouter)
@@ -17,4 +18,5 @@ export const bindRoutes = (app: Hono) => {
     app.route('/lists', commentsRouter)
     app.route('/me', meApp)
     app.route('/community', comApp)
+    app.route('/users', userRouter)
 }
