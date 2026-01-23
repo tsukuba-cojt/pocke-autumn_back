@@ -7,6 +7,8 @@ import { addMeToo } from '../features/item/meToo'
 import { removeMeToo } from '../features/item/removeMeToo'
 import { listMeTooUsers } from '../features/item/listMeTooUsers'
 import { deleteItem } from '../features/item/deleteItem'
+import { addBookmark } from '../features/item/addBookmark'
+import { removeBookmark } from '../features/item/removeBookmark'
 
 export const itemRouter = new Hono<AppEnv>()
 
@@ -104,6 +106,44 @@ itemRouter.get('/:listItemId/me-too', async (c) => {
   }
 
   const result = await listMeTooUsers(c.var.db, { listItemId })
+  return c.json(result, 200)
+})
+
+itemRouter.post('/:listItemId/bookmark', async (c) => {
+  const { listItemId } = c.req.param()
+
+  if (!listItemId) {
+    return c.json({ message: 'listItemId is required' }, 400)
+  }
+
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub as string
+
+  const result = await addBookmark(c.var.db, { listItemId, userId })
+
+  if (!result) {
+    return c.json({ message: 'already bookmarked' }, 409)
+  }
+
+  return c.json(result, 201)
+})
+
+itemRouter.delete('/:listItemId/bookmark', async (c) => {
+  const { listItemId } = c.req.param()
+
+  if (!listItemId) {
+    return c.json({ message: 'listItemId is required' }, 400)
+  }
+
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub as string
+
+  const result = await removeBookmark(c.var.db, { listItemId, userId })
+
+  if (!result.removed) {
+    return c.json({ message: 'bookmark not found' }, 404)
+  }
+
   return c.json(result, 200)
 })
 
