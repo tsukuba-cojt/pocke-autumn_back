@@ -12,4 +12,7 @@ export type Bindings = {
   SPOTIFY_CLIENT_SECRET: string;
   TWITCH_CLIENT_ID: string;
   TWITCH_CLIENT_SECRET: string;
+  CLOUDFLARE_ACCOUNT_ID: string;
+  CLOUDFLARE_IMAGES_API_TOKEN: string;
+  CLOUDFLARE_IMAGES_DEFAULT_VARIANT?: string;
 }

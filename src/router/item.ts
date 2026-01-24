@@ -9,6 +9,7 @@ import { listMeTooUsers } from '../features/item/listMeTooUsers'
 import { deleteItem } from '../features/item/deleteItem'
 import { addBookmark } from '../features/item/addBookmark'
 import { removeBookmark } from '../features/item/removeBookmark'
+import { listBookmarks } from '../features/item/listBookmarks'
 
 export const itemRouter = new Hono<AppEnv>()
 
@@ -53,7 +54,12 @@ itemRouter.get('/list/:listId', async (c) => {
   }
 
   const result = await showItem(c.var.db, { listId })
-  return c.json(result, 200)
+  return c.json(
+    {
+      listItems: result.items.map((row) => row.listItem),
+    },
+    200
+  )
 })
 
 itemRouter.post('/:listItemId/me-too', async (c) => {
@@ -144,6 +150,14 @@ itemRouter.delete('/:listItemId/bookmark', async (c) => {
     return c.json({ message: 'bookmark not found' }, 404)
   }
 
+  return c.json(result, 200)
+})
+
+itemRouter.get('/bookmarks', async (c) => {
+  const payload = c.get('jwtPayload')
+  const userId = payload.sub as string
+
+  const result = await listBookmarks(c.var.db, { userId })
   return c.json(result, 200)
 })
 
