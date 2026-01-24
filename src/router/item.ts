@@ -10,6 +10,7 @@ import { deleteItem } from '../features/item/deleteItem'
 import { addBookmark } from '../features/item/addBookmark'
 import { removeBookmark } from '../features/item/removeBookmark'
 import { listBookmarks } from '../features/item/listBookmarks'
+import { getListItemDetail } from '../features/item/getListItemDetail'
 
 export const itemRouter = new Hono<AppEnv>()
 
@@ -56,7 +57,11 @@ itemRouter.get('/list/:listId', async (c) => {
   const result = await showItem(c.var.db, { listId })
   return c.json(
     {
-      listItems: result.items.map((row) => row.listItem),
+      items: result.items.map((row) => ({
+        listItem: row.listItem,
+        item: row.item,
+        meTooUsers: row.meTooUsers,
+      })),
     },
     200
   )
@@ -158,6 +163,22 @@ itemRouter.get('/bookmarks', async (c) => {
   const userId = payload.sub as string
 
   const result = await listBookmarks(c.var.db, { userId })
+  return c.json(result, 200)
+})
+
+itemRouter.get('/list-item/:listItemId', async (c) => {
+  const { listItemId } = c.req.param()
+
+  if (!listItemId) {
+    return c.json({ message: 'listItemId is required' }, 400)
+  }
+
+  const result = await getListItemDetail(c.var.db, { listItemId })
+
+  if (!result) {
+    return c.json({ message: 'list item not found' }, 404)
+  }
+
   return c.json(result, 200)
 })
 
