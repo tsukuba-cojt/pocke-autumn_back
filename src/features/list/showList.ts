@@ -34,6 +34,7 @@ export const showList = async (
       name: list.name,
       description: list.description,
       thumbnailUrl: list.thumbnail_url,
+      genreName: list.genreName ?? null,
       userId: list.userId,
       createdAt: list.createdAt,
       updatedAt: list.updatedAt,

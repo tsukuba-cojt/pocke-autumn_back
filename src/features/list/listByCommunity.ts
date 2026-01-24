@@ -27,6 +27,7 @@ export const listByCommunity = async (
       name: row.lists.name,
       description: row.lists.description,
       thumbnailUrl: row.lists.thumbnail_url,
+      genreName: row.lists.genreName ?? null,
       userId: row.lists.userId,
       createdAt: row.lists.createdAt,
       updatedAt: row.lists.updatedAt,

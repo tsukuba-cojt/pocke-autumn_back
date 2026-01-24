@@ -89,6 +89,7 @@ comApp.post('/:communityId/lists', async (c) => {
     name: string
     description?: string | null
     thumbnailUrl?: string | null
+    genreName?: string | null
   }>()
 
   if (!body?.name) {
@@ -102,6 +103,7 @@ comApp.post('/:communityId/lists', async (c) => {
     name: body.name,
     description: body.description,
     thumbnailUrl: body.thumbnailUrl,
+    genreName: body.genreName,
     userId,
     communityId,
   })

@@ -6,6 +6,7 @@ type CreateListInput = {
   name: string
   description?: string | null
   thumbnailUrl?: string | null
+  genreName?: string | null
   userId: string
   communityId: string
 }
@@ -23,6 +24,7 @@ export const createList = async (
       name: input.name,
       description: input.description ?? null,
       thumbnail_url: input.thumbnailUrl ?? null,
+      genreName: input.genreName ?? null,
       userId: input.userId,
     })
     .returning()
@@ -47,6 +49,7 @@ export const createList = async (
       name: createdList.name,
       description: createdList.description,
       thumbnailUrl: createdList.thumbnail_url,
+      genreName: createdList.genreName ?? null,
       userId: createdList.userId,
       createdAt: createdList.createdAt,
       updatedAt: createdList.updatedAt,

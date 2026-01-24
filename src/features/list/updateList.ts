@@ -8,6 +8,7 @@ type UpdateListInput = {
   name?: string
   description?: string | null
   thumbnailUrl?: string | null
+  genreName?: string | null
 }
 
 type UpdateListResult = {
@@ -25,6 +26,7 @@ export const updateList = async (
   if (input.name !== undefined) updates.name = input.name
   if (input.description !== undefined) updates.description = input.description
   if (input.thumbnailUrl !== undefined) updates.thumbnail_url = input.thumbnailUrl
+  if (input.genreName !== undefined) updates.genreName = input.genreName
 
   const updated = await db
     .update(lists)
@@ -43,6 +45,7 @@ export const updateList = async (
       name: updated.name,
       description: updated.description,
       thumbnailUrl: updated.thumbnail_url,
+      genreName: updated.genreName ?? null,
       userId: updated.userId,
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,

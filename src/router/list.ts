@@ -19,6 +19,7 @@ listRouter.post('/create', async (c) => {
     name: string
     description?: string
     thumbnailUrl?: string
+    genreName?: string
     userId: string
     communityId: string
   }>()
@@ -31,6 +32,7 @@ listRouter.post('/create', async (c) => {
     name: body.name,
     description: body.description,
     thumbnailUrl: body.thumbnailUrl,
+    genreName: body.genreName,
     userId: body.userId,
     communityId: body.communityId,
   })
@@ -78,12 +80,14 @@ listRouter.patch('/:listId', async (c) => {
     name?: string
     description?: string | null
     thumbnailUrl?: string | null
+    genreName?: string | null
   }>()
 
   if (
     body?.name === undefined &&
     body?.description === undefined &&
-    body?.thumbnailUrl === undefined
+    body?.thumbnailUrl === undefined &&
+    body?.genreName === undefined
   ) {
     return c.json({ message: 'at least one field is required' }, 400)
   }
@@ -93,6 +97,7 @@ listRouter.patch('/:listId', async (c) => {
     name: body.name,
     description: body.description,
     thumbnailUrl: body.thumbnailUrl,
+    genreName: body.genreName,
   })
 
   if (!result) {

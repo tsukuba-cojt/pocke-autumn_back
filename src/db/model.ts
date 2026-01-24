@@ -30,6 +30,7 @@ export const lists = sqliteTable('lists', {
   name: text('name').notNull(),
   description: text('description'),
   thumbnail_url: text('thumbnail_url'),
+  genreName: text('genre_name'),
   userId: text('user_id').notNull().references(() => users.id),
   createdAt: integer('created_at')
     .notNull()
