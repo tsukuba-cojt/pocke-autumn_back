@@ -87,7 +87,7 @@ authApp.get('/google/callback', async (c) => {
   const google = new Google(
     c.env.GOOGLE_CLIENT_ID,
     c.env.GOOGLE_CLIENT_SECRET,
-    'host.exp.exponent://oauthredirect'
+    'https://pocke-autumn-back.pocke-cojt.workers.dev/auth/google/callback'
   )
   const url = new URL(c.req.url)
   const code = url.searchParams.get('code')
@@ -96,13 +96,13 @@ authApp.get('/google/callback', async (c) => {
   const storedState = getCookie(c, 'state')
   const storedVerifier = getCookie(c, 'code_verifier')
 
-  // console.log('Debug Auth:', { 
-  //     codeExists: !!code, 
-  //     stateMatches: state === storedState, 
-  //     storedVerifier,
-  //     receivedState: state,
-  //     cookieState: storedState
-  // });
+  console.log('Debug Auth:', { 
+      codeExists: !!code, 
+      stateMatches: state === storedState, 
+      storedVerifier,
+      receivedState: state,
+      cookieState: storedState
+  });
 
   if (!code || !storedVerifier || state !== storedState) return c.json({ error: 'Invalid request' }, 400)
 
