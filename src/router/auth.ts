@@ -87,7 +87,7 @@ authApp.get('/google/callback', async (c) => {
   const google = new Google(
     c.env.GOOGLE_CLIENT_ID,
     c.env.GOOGLE_CLIENT_SECRET,
-    'https://pocke-autumn-back.pocke-cojt.workers.dev/auth/google/callback'
+    'host.exp.exponent://oauthredirect'
   )
   const url = new URL(c.req.url)
   const code = url.searchParams.get('code')
