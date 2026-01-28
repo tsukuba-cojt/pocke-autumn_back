@@ -119,7 +119,7 @@ authApp.get('/google/callback', async (c) => {
     })
 
     const token = await createToken(user, c.env.JWT_SECRET)
-    return c.redirect("https://pocke-autumn-back.pocke-cojt.workers.dev/") // 本番ではフロントエンドへリダイレクト推奨
+    return c.redirect("host.exp.exponent://oauthredirect") // 本番ではフロントエンドへリダイレクト推奨
   } catch (e) {
     console.error('認証エラー発生')
     console.error(e)
