@@ -119,7 +119,8 @@ authApp.get('/google/callback', async (c) => {
     })
 
     const token = await createToken(user, c.env.JWT_SECRET)
-    return c.redirect("host.exp.exponent://oauthredirect") // 本番ではフロントエンドへリダイレクト推奨
+    const redirectUrl = `host.exp.exponent://oauthredirect?token=${encodeURIComponent(token)}`
+    return c.redirect(redirectUrl) // 本番ではフロントエンドへリダイレクト推奨
   } catch (e) {
     console.error('認証エラー発生')
     console.error(e)
