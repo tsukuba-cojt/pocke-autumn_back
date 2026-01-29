@@ -67,6 +67,17 @@ comApp.get('/user/:userId', async (c) => {
   return c.json(result, 200)
 })
 
+comApp.get('/:communityId/invite', async (c) => {
+  const { communityId } = c.req.param()
+
+  if (!communityId) {
+    return c.json({ message: 'communityId is required' }, 400)
+  }
+
+  const deeplink = `pocke://community/${communityId}/join`
+  return c.json({ deeplink }, 200)
+})
+
 comApp.get('/:communityId/members', async (c) => {
   const { communityId } = c.req.param()
 
